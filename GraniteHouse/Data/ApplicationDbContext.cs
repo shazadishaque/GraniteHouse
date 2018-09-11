@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GraniteHouse.Models;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -12,5 +13,7 @@ namespace GraniteHouse.Data
             : base(options)
         {
         }
+
+        public DbSet<ProductTypes> ProductTypes { get; set; }
     }
 }
