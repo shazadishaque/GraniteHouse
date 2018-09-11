@@ -1,4 +1,5 @@
 ﻿using GraniteHouse.Data;
+using GraniteHouse.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +32,7 @@ namespace GraniteHouse.Areas.Admin.Controllers
         //POST Create Action Method
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ProductTypesController productTypes)
+        public async Task<IActionResult> Create(ProductTypes productTypes)
         {
             if(ModelState.IsValid)
             {
