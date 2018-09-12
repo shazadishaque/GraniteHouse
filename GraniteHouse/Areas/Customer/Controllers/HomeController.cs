@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using GraniteHouse.Models;
 using Microsoft.EntityFrameworkCore;
+using GraniteHouse.Extensions;
 
 namespace GraniteHouse.Controllers
 {
@@ -32,6 +33,23 @@ namespace GraniteHouse.Controllers
             var product = await _db.Products.Include(m => m.ProductTypes).Include(m => m.SpecialTags).Where(m => m.Id == id).FirstOrDefaultAsync();
 
             return View(product);
+        }
+
+        [HttpPost, ActionName("Details")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DetailsPost(int id)
+        {
+            List<int> listShoppingCart = HttpContext.Session.Get<List<int>>("ssShoppingCart");
+
+            if(listShoppingCart == null)
+            {
+                listShoppingCart = new List<int>();
+            }
+
+            listShoppingCart.Add(id);
+            HttpContext.Session.Set("ssShoppingCart", listShoppingCart);
+
+            return RedirectToAction("Index", "Home", new { Area = "Customer" });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
