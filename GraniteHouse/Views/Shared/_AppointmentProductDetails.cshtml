@@ -1,0 +1,55 @@
+﻿@model List<GraniteHouse.Models.Products>
+@{
+    ViewData["Title"] = "_AppointmentProductDetails";
+}
+
+@if (Model.Count > 0)
+{
+    <table class="table table-striped" style="width:100%">
+        <tr class="table-info">
+            <th style="text-align:center; width:20%;"></th>
+
+            <th style="text-align:center;">
+                <label asp-for="@Model.FirstOrDefault().Name"></label>
+            </th>
+            <th style="text-align:center;">
+                <label asp-for="@Model.FirstOrDefault().Price"></label>
+            </th>
+            <th style="text-align:center;">
+                <label asp-for="@Model.FirstOrDefault().ShadeColour"></label>
+            </th>
+            <th style="text-align:center;">
+                <label asp-for="@Model.FirstOrDefault().ProductTypes.Name"></label>
+            </th>
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr style="padding:50px;">
+                <td>
+                    <a asp-area="Customer" asp-controller="Home" asp-action="Details" asp-route-id="@item.Id">
+                        <img src="@item.Image" style="border:1px solid #bbb9b9; border-radius:5px; display:block; margin:auto; width:100%;" />
+                    </a>
+                </td>
+                <td style="text-align:center;">
+                    @Html.DisplayFor(c => item.Name)
+                </td>
+                <td style="text-align:center;">
+                    @Html.DisplayFor(c => item.Price)
+                </td>
+                <td style="text-align:center;">
+                    @Html.DisplayFor(c => item.ShadeColour)
+                </td>
+                <td style="text-align:center;">
+                    @Html.DisplayFor(c => item.ProductTypes.Name)
+                </td>
+                <td style="text-align:center;"></td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <div>No items added to the shopping cart...</div>
+}
