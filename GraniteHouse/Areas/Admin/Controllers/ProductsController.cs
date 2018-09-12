@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using GraniteHouse.Utility;
+using GraniteHouse.Models;
 
 namespace GraniteHouse.Controllers
 {
@@ -122,7 +123,7 @@ namespace GraniteHouse.Controllers
 
                 var productFromDb = _db.Products.Where(m => m.Id == ProductsVM.Products.Id).FirstOrDefault();
 
-                if(files[0].Length > 0 && files[0] != null)
+                if(files.Count() != 0 && files[0].Length > 0 && files[0] != null)
                 {
                     //if user uploads a new image
                     var uploads = Path.Combine(webRootPath, SD.ImageFolder);
@@ -177,6 +178,53 @@ namespace GraniteHouse.Controllers
             }
 
             return View(ProductsVM);
+        }
+
+        //Get: Products Delete
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            ProductsVM.Products = await _db.Products.Include(m => m.SpecialTags).Include(m => m.ProductTypes).SingleOrDefaultAsync(m => m.Id == id);
+
+            if (ProductsVM.Products == null)
+            {
+                return NotFound();
+            }
+
+            return View(ProductsVM);
+        }
+
+        //Post: Products Delete
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            string webRootPath = _hostingEnvironment.WebRootPath;
+            Products products = await _db.Products.FindAsync(id);
+
+            if(products == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                var uploads = Path.Combine(webRootPath, SD.ImageFolder);
+                var extension = Path.GetExtension(products.Image);
+
+                if(System.IO.File.Exists(Path.Combine(uploads, products.Id + extension)))
+                {
+                    System.IO.File.Delete(Path.Combine(uploads, products.Id + extension));
+                }
+
+                _db.Products.Remove(products);
+                await _db.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
 }
