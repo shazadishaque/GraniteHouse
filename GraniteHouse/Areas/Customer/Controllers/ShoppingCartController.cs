@@ -33,7 +33,7 @@ namespace GraniteHouse.Areas.Customer.Controllers
         //Get: Index Shopping Cart
         public async Task<IActionResult> Index()
         {
-            List<int> listShoppingCart = HttpContext.Session.Get<List<int>>("ssShoppingCart");
+            List<int> listShoppingCart = HttpContext.Session.Get<List<int>>("ssShoppingCart") ?? new List<int>();
 
             if(listShoppingCart.Count > 0)
             {
@@ -45,6 +45,42 @@ namespace GraniteHouse.Areas.Customer.Controllers
             }
 
             return View(ShoppingCartVM);
+        }
+
+        //Post: Index Shopping Cart
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Index")]
+        public async Task<IActionResult> IndexPost()
+        {
+            List<int> listCartItems = HttpContext.Session.Get<List<int>>("ssShoppingCart");
+
+            ShoppingCartVM.Appointments.AppointmentDate = ShoppingCartVM.Appointments.AppointmentDate
+                                                            .AddHours(ShoppingCartVM.Appointments.AppointmentTime.Hour)
+                                                            .AddMinutes(ShoppingCartVM.Appointments.AppointmentTime.Minute);
+
+            Appointments appointments = ShoppingCartVM.Appointments;
+            _db.Appointments.Add(appointments);
+            _db.SaveChanges();
+
+            int appointmentId = appointments.Id;
+
+            foreach(int productId in listCartItems)
+            {
+                ProductsSelectedForAppointment productsSelectedForAppointment = new ProductsSelectedForAppointment()
+                {
+                    AppointmentId = appointmentId,
+                    ProductId = productId
+                };
+
+                _db.ProductsSelectedForAppointment.Add(productsSelectedForAppointment);
+            }
+
+            _db.SaveChanges();
+            listCartItems = new List<int>();
+            HttpContext.Session.Set("ssShoppingCart", listCartItems);
+
+            return RedirectToAction("Index");
         }
     }
 }
