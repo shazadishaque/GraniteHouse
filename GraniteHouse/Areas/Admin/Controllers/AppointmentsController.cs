@@ -101,5 +101,52 @@ namespace GraniteHouse.Areas.Admin.Controllers
 
             return View(objAppointmentVM);
         }
+
+        //Post: Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, AppointmentDetailsViewModel objAppointmentVM)
+        {
+            if(ModelState.IsValid)
+            {
+                objAppointmentVM.Appointment.AppointmentDate = objAppointmentVM.Appointment.AppointmentDate
+                                                                .AddHours(objAppointmentVM.Appointment.AppointmentTime.Hour)
+                                                                .AddMinutes(objAppointmentVM.Appointment.AppointmentTime.Minute);
+
+                var appointmentFromDb = _db.Appointments.Where(a => a.Id == objAppointmentVM.Appointment.Id).FirstOrDefault();
+
+                appointmentFromDb.CustomerName = objAppointmentVM.Appointment.CustomerName;
+                appointmentFromDb.CustomerEmail = objAppointmentVM.Appointment.CustomerEmail;
+                appointmentFromDb.AppointmentDate = objAppointmentVM.Appointment.AppointmentDate;
+                appointmentFromDb.CustomerPhoneNumber = objAppointmentVM.Appointment.CustomerPhoneNumber;
+                appointmentFromDb.IsConfirmed = objAppointmentVM.Appointment.IsConfirmed;
+
+                if (User.IsInRole(SD.SuperAdminEndUser))
+                {
+                    appointmentFromDb.SalesPersonId = objAppointmentVM.Appointment.SalesPersonId;
+                }
+                else
+                {
+                    appointmentFromDb.SalesPersonId = "";
+                }
+
+                _db.SaveChanges();
+
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                var productList = (IEnumerable<Products>)(from p in _db.Products
+                                                          join a in _db.ProductsSelectedForAppointment
+                                                          on p.Id equals a.ProductId
+                                                          where a.AppointmentId == id
+                                                          select p).Include("ProductTypes");
+
+                objAppointmentVM.SalesPerson = _db.ApplicationUsers.Where(u => u.LockoutEnd == null || u.LockoutEnd < DateTime.Now).ToList();
+                objAppointmentVM.Products = productList.ToList();
+            }
+
+            return View(objAppointmentVM);
+        }
     }
 }

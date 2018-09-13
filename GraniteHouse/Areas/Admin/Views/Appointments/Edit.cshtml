@@ -144,10 +144,11 @@
                 time = time.substring(0, time.length - 1);
             }
             
-            var amPmTime = splitData[2] || time.split(':')[0] > 11 ? 'AM': 'PM';
+            //var amPmTime = splitData[2] || time.split(':')[0] > 11 ? 'AM': 'PM';
+            var amPmTime = splitData[2] != null ? (' ' + splitData[2]) : ':00';
 
             $('#datepicker').attr('value', splitData[0]);
-            $('#timepicker').attr('value', time + ' ' + amPmTime);
+            $('#timepicker').attr('value', time + amPmTime);
         });
     </script>
 }

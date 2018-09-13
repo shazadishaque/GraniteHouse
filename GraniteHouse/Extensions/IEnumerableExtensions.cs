@@ -26,13 +26,20 @@ namespace GraniteHouse.Extensions
                 selectedValue = "";
             }
 
-            return from item in items
+            if(items == null)
+            {
+                items = new List<T>();
+            }
+
+            IEnumerable<SelectListItem> options = from item in items
                    select new SelectListItem
                    {
                        Text = item.GetPropertyValue("Name"),
                        Value = item.GetPropertyValue("Id"),
                        Selected = item.GetPropertyValue("Id").Equals(selectedValue.ToString())
                    };
+
+            return options;
         }
     }
 }
