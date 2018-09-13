@@ -10,9 +10,11 @@ using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using GraniteHouse.Utility;
 using GraniteHouse.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GraniteHouse.Controllers
 {
+    [Authorize(Roles = SD.SuperAdminEndUser)]
     [Area("Admin")]
     public class ProductsController : Controller
     {
