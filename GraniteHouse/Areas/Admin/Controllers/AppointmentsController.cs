@@ -8,6 +8,7 @@ using GraniteHouse.Models;
 using GraniteHouse.Models.ViewModel;
 using GraniteHouse.Utility;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +27,7 @@ namespace GraniteHouse.Areas.Admin.Controllers
             _db = db;
         }
 
+        //Get: Index
         public async Task<IActionResult> Index(string searchName=null, string searchEmail=null, string searchPhone=null, string searchDate=null)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
@@ -73,6 +75,31 @@ namespace GraniteHouse.Areas.Admin.Controllers
             }
 
             return View(appointmentVM);
+        }
+
+        //Get: Edit
+        public IActionResult Edit(int? id)
+        {
+            if(id == null)
+            {
+                return NotFound();
+            }
+
+            var productList = (IEnumerable<Products>)(from p in _db.Products
+                                                   join a in _db.ProductsSelectedForAppointment
+                                                   on p.Id equals a.ProductId
+                                                   where a.AppointmentId == id
+                                                   select p).Include("ProductTypes");
+
+            AppointmentDetailsViewModel objAppointmentVM = new AppointmentDetailsViewModel()
+            {
+                Appointment = _db.Appointments.Include(s => s.SalesPerson).Where(a => a.Id == id).FirstOrDefault(),
+                SalesPerson = _db.ApplicationUsers.Where(u => u.LockoutEnd == null || u.LockoutEnd < DateTime.Now).ToList(),
+                Products = productList.ToList()
+            };
+
+
+            return View(objAppointmentVM);
         }
     }
 }
